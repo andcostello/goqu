@@ -1,3 +1,20 @@
+## v6.1.0
+
+* Handle nil *time.Time Literal [#73](https://github.com/doug-martin/goqu/pull/73) and [#52](https://github.com/doug-martin/goqu/pull/52) - [@RoarkeRandall](https://github.com/RoarkeRandall) and [@quetz](https://github.com/quetz)
+* Add ability to change column rename function [#66](https://github.com/doug-martin/goqu/pull/66) - [@blainehansen](https://github.com/blainehansen)
+
+## v6.0.0
+
+* Updated go support to `1.10`, `1.11` and `1.12`
+* Change testify dependency from c2fo/testify back to stretchr/testify.
+* Add support for "FOR UPDATE" and "SKIP LOCKED" [#62](https://github.com/doug-martin/goqu/pull/62) - [@btubbs](https://github.com/btubbs)
+* Changed to use go modules
+
+## v5.0.0
+
+* Drop go 1.6 support, supported versions are `1.8`, `1.9` and latest
+* Add context support [#64](https://github.com/doug-martin/goqu/pull/64) - [@cmoad](https://github.com/cmoad)
+
 ## v4.2.0
 
 * Add support for ON CONFLICT when using a dataset [#55](https://github.com/doug-martin/goqu/pull/55) - [@bobrnor](https://github.com/bobrnor)

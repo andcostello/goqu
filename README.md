@@ -9,7 +9,7 @@
 [![Build Status](https://travis-ci.org/doug-martin/goqu.svg?branch=master)](https://travis-ci.org/doug-martin/goqu)
 [![GoDoc](https://godoc.org/github.com/doug-martin/goqu?status.png)](http://godoc.org/github.com/doug-martin/goqu)
 [![codecov](https://codecov.io/gh/doug-martin/goqu/branch/master/graph/badge.svg)](https://codecov.io/gh/doug-martin/goqu)
-[![Join the chat at https://gitter.im/doug-martin/goqu](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/doug-martin/goqu?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Go Report Card](https://goreportcard.com/badge/github.com/doug-martin/goqu/v6)](https://goreportcard.com/report/github.com/doug-martin/goqu/v6)
 
 `goqu` is an expressive SQL builder
 
@@ -54,7 +54,7 @@ or hooks I would recommend looking at some of the great ORM libraries such as:
 ## Installation
 
 ```sh
-go get -u gopkg.in/doug-martin/goqu.v4
+go get -u github.com/doug-martin/goqu/v6
 ```
 
 
@@ -63,17 +63,17 @@ go get -u gopkg.in/doug-martin/goqu.v4
 
 In order to start using goqu with your database you need to load an adapter. We have included some adapters by default.
 
-1. Postgres - `import "gopkg.in/doug-martin/goqu.v4/adapters/postgres"`
-2. MySQL - `import "gopkg.in/doug-martin/goqu.v4/adapters/mysql"`
-3. SQLite3 - `import "gopkg.in/doug-martin/goqu.v4/adapters/sqlite3"`
+1. Postgres - `import "github.com/doug-martin/goqu/v6/adapters/postgres"`
+2. MySQL - `import "github.com/doug-martin/goqu/v6/adapters/mysql"`
+3. SQLite3 - `import "github.com/doug-martin/goqu/v6/adapters/sqlite3"`
 
 Adapters in goqu work the same way as a driver with the database in that they register themselves with goqu once loaded.
 
 ```go
 import (
   "database/sql"
-  "gopkg.in/doug-martin/goqu.v4"
-  _ "gopkg.in/doug-martin/goqu.v4/adapters/postgres"
+  "github.com/doug-martin/goqu/v6"
+  _ "github.com/doug-martin/goqu/v6/adapters/postgres"
   _ "github.com/lib/pq"
 )
 ```
@@ -92,7 +92,7 @@ Now that you have your goqu.Database you can build your SQL and it will be forma
 
 ```go
 //interpolated sql
-sql, _ := db.From("user").Where(goqu.Ex{
+sql, _, _ := db.From("user").Where(goqu.Ex{
     "id": 10,
 }).ToSql()
 fmt.Println(sql)
@@ -408,6 +408,27 @@ if !found {
 }
 ```
 
+
+**NOTE** Using the `goqu.SetColumnRenameFunction` function, you can change the function that's used to rename struct fields when struct tags aren't defined
+
+```go
+import "strings"
+
+goqu.SetColumnRenameFunction(strings.ToUpper)
+
+type User struct{
+  FirstName string
+  LastName string
+}
+
+var user User
+//SELECT "FIRSTNAME", "LASTNAME" FROM "user" LIMIT 1;
+found, err := db.From("user").ScanStruct(&user)
+// ...
+```
+
+
+
 * [`ScanVals`](http://godoc.org/github.com/doug-martin/goqu#Dataset.ScanVals) - scans a rows of 1 column into a slice of primitive values
 ```go
 var ids []int64
@@ -535,7 +556,7 @@ if err := delete.ScanVals(&ids); err != nil{
 <a name="dataset_prepared"></a>
 #### Prepared Statements
 
-By default the `Dataset` will interpolate all parameters, if you do not want to have values interolated you can use the [`Prepared`](http://godoc.org/github.com/doug-martin/goqu#Dataset.Prepared) method to prevent this.
+By default the `Dataset` will interpolate all parameters, if you do not want to have values interpolated you can use the [`Prepared`](http://godoc.org/github.com/doug-martin/goqu#Dataset.Prepared) method to prevent this.
 
 **Note** For the examples all placeholders are `?` this will be adapter specific when using other examples (e.g. Postgres `$1, $2...`)
 
@@ -709,7 +730,7 @@ For example the code for the postgres adapter is fairly short.
 package postgres
 
 import (
-    "gopkg.in/doug-martin/goqu.v4"
+    "github.com/doug-martin/goqu/v6"
 )
 
 //postgres requires a $ placeholder for prepared statements

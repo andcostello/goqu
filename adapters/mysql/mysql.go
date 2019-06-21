@@ -1,6 +1,6 @@
 package mysql
 
-import "gopkg.in/doug-martin/goqu.v4"
+import "github.com/doug-martin/goqu/v6"
 
 var (
 	placeholder_rune    = '?'

@@ -1,12 +1,23 @@
 package goqu
 
 import (
-	"github.com/c2fo/testify/assert"
-	"gopkg.in/DATA-DOG/go-sqlmock.v1"
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/stretchr/testify/assert"
 
 	"database/sql"
 	"time"
 )
+
+func (me *datasetTest) TestInsertNullTime() {
+	t := me.T()
+	ds1 := From("items")
+	type item struct {
+		CreatedAt *time.Time `db:"created_at"`
+	}
+	sql, _, err := ds1.ToInsertSql(item{CreatedAt: nil})
+	assert.NoError(t, err)
+	assert.Equal(t, sql, `INSERT INTO "items" ("created_at") VALUES (NULL)`)
+}
 
 func (me *datasetTest) TestInsertSqlNoReturning() {
 	t := me.T()
@@ -381,7 +392,7 @@ func (me *datasetTest) TestPreparedInsertSqlWitSqlBuilder() {
 
 	sql, args, err := ds1.Prepared(true).ToInsertSql(From("other_items").Where(I("b").Gt(10)))
 	assert.NoError(t, err)
-	assert.Equal(t, args, []interface{}{10})
+	assert.Equal(t, args, []interface{}{int64(10)})
 	assert.Equal(t, sql, `INSERT INTO "items" SELECT * FROM "other_items" WHERE ("b" > ?)`)
 }
 
@@ -395,7 +406,7 @@ func (me *datasetTest) TestPreparedInsertReturning() {
 
 	sql, args, err := ds1.Returning("id").Prepared(true).ToInsertSql(From("other_items").Where(I("b").Gt(10)))
 	assert.NoError(t, err)
-	assert.Equal(t, args, []interface{}{10})
+	assert.Equal(t, args, []interface{}{int64(10)})
 	assert.Equal(t, sql, `INSERT INTO "items" SELECT * FROM "other_items" WHERE ("b" > ?) RETURNING "id"`)
 
 	sql, args, err = ds1.Prepared(true).ToInsertSql(map[string]interface{}{"name": "Test", "address": "111 Test Addr"})
@@ -556,7 +567,7 @@ func (me *datasetTest) TestPreparedInsertSqlWithValuer() {
 	sqlString, args, err := ds1.Prepared(true).ToInsertSql(item{Name: "Test", Address: "111 Test Addr", Valuer: sql.NullInt64{Int64: 10, Valid: true}})
 	assert.NoError(t, err)
 	assert.Equal(t, args, []interface{}{
-		"111 Test Addr", "Test", 10,
+		"111 Test Addr", "Test", int64(10),
 	})
 	assert.Equal(t, sqlString, `INSERT INTO "items" ("address", "name", "valuer") VALUES (?, ?, ?)`)
 
@@ -568,10 +579,10 @@ func (me *datasetTest) TestPreparedInsertSqlWithValuer() {
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, args, []interface{}{
-		"111 Test Addr", "Test1", 10,
-		"211 Test Addr", "Test2", 20,
-		"311 Test Addr", "Test3", 30,
-		"411 Test Addr", "Test4", 40,
+		"111 Test Addr", "Test1", int64(10),
+		"211 Test Addr", "Test2", int64(20),
+		"311 Test Addr", "Test3", int64(30),
+		"411 Test Addr", "Test4", int64(40),
 	})
 	assert.Equal(t, sqlString, `INSERT INTO "items" ("address", "name", "valuer") VALUES (?, ?, ?), (?, ?, ?), (?, ?, ?), (?, ?, ?)`)
 }
