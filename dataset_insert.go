@@ -212,6 +212,9 @@ func (me *Dataset) insertFromSql(other Dataset, prepared bool, c ConflictExpress
 	if err := me.adapter.SourcesSql(buf, me.clauses.From); err != nil {
 		return "", nil, NewGoquError(err.Error())
 	}
+	if err := me.adapter.InsertColumnsSql(buf, other.clauses.Select); err != nil {
+		return "", nil, err
+	}
 	buf.WriteString(" ")
 	if err := other.selectSqlWriteTo(buf); err != nil {
 		return "", nil, err
