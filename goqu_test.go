@@ -1,52 +1,60 @@
 package goqu
 
-type testNoReturnAdapter struct {
-	Adapter
+import (
+	"testing"
+
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/stretchr/testify/suite"
+)
+
+type (
+	dialectWrapperSuite struct {
+		suite.Suite
+	}
+)
+
+func (dws *dialectWrapperSuite) SetupSuite() {
+	testDialect := DefaultDialectOptions()
+	// override to some value to ensure correct dialect is set
+	RegisterDialect("test", testDialect)
 }
 
-func (me *testNoReturnAdapter) SupportsReturn() bool {
-	return false
+func (dws *dialectWrapperSuite) TearDownSuite() {
+	DeregisterDialect("test")
 }
 
-type testLimitAdapter struct {
-	Adapter
+func (dws *dialectWrapperSuite) TestFrom() {
+	dw := Dialect("test")
+	dws.Equal(From("table").WithDialect("test"), dw.From("table"))
 }
 
-func (me *testLimitAdapter) SupportsLimitOnDelete() bool {
-	return true
+func (dws *dialectWrapperSuite) TestSelect() {
+	dw := Dialect("test")
+	dws.Equal(Select("col").WithDialect("test"), dw.Select("col"))
 }
 
-func (me *testLimitAdapter) SupportsLimitOnUpdate() bool {
-	return true
+func (dws *dialectWrapperSuite) TestInsert() {
+	dw := Dialect("test")
+	dws.Equal(Insert("table").WithDialect("test"), dw.Insert("table"))
 }
 
-type testOrderAdapter struct {
-	Adapter
+func (dws *dialectWrapperSuite) TestDelete() {
+	dw := Dialect("test")
+	dws.Equal(Delete("table").WithDialect("test"), dw.Delete("table"))
 }
 
-func (me *testOrderAdapter) SupportsOrderByOnDelete() bool {
-	return true
+func (dws *dialectWrapperSuite) TestTruncate() {
+	dw := Dialect("test")
+	dws.Equal(Truncate("table").WithDialect("test"), dw.Truncate("table"))
 }
 
-func (me *testOrderAdapter) SupportsOrderByOnUpdate() bool {
-	return true
+func (dws *dialectWrapperSuite) TestDB() {
+	mDb, _, err := sqlmock.New()
+	dws.Require().NoError(err)
+	dw := Dialect("test")
+	dws.Equal(New("test", mDb), dw.DB(mDb))
 }
 
-func init() {
-	RegisterAdapter("mock", func(ds *Dataset) Adapter {
-		return NewDefaultAdapter(ds)
-	})
-	RegisterAdapter("no-return", func(ds *Dataset) Adapter {
-		adapter := NewDefaultAdapter(ds)
-		return &testNoReturnAdapter{adapter}
-	})
-	RegisterAdapter("limit", func(ds *Dataset) Adapter {
-		adapter := NewDefaultAdapter(ds)
-		return &testLimitAdapter{adapter}
-	})
-	RegisterAdapter("order", func(ds *Dataset) Adapter {
-		adapter := NewDefaultAdapter(ds)
-		return &testOrderAdapter{adapter}
-	})
-
+func TestDialectWrapper(t *testing.T) {
+	suite.Run(t, new(dialectWrapperSuite))
 }
